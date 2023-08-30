@@ -48,3 +48,15 @@ ts.plot(dataturis.ts, xlab="Time Period", ylab="Pendatang Mancanegara",
         main = "Time Series Plot")
 points(dataturis.ts)
 ```
+
+#Single Moving Average & Double Moving Average
+## Pembagian Data
+
+Pembagian data latih dan data uji dilakukan dengan perbandingan 80% data latih dan 20% data uji.
+```{r}
+#membagi data latih dan data uji
+training_ma <- data2[1:96,]
+testing_ma <- data2[97:120,]
+train_ma.ts <- ts(training_ma$Sales)
+test_ma.ts <- ts(testing_ma$Sales)
+```
