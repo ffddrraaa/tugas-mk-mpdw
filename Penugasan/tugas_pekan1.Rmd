@@ -66,7 +66,7 @@ points(plot_wisatawan)
 training<-data.turis[1:106,2]
 testing<-data.turis[107:133,2]
 training.ts<-ts(training, frequency = 12, start = 2009)
-testing.ts<-ts(testing, frequency = 12, start=2017.8)
+testing.ts<-ts(testing, frequency = 12, start=2017)
 ```
 
 ### Eksplorasi Data latih dan data uji Eksplorasi data dilakukan pada keseluruhan data, data latih serta data uji menggunakan plot data deret waktu.
@@ -100,126 +100,6 @@ legend("bottomleft", c("Data Training", "Data Testing"), lty=1, col=c("black", "
 Berdasarkan analisis plot deret waktu jumlah kunjungan wisatawan mancanegara pada data training dan testing, dapat disimpulkan bahwa data tersebut tidak bersifat stasioner karena plot data tidak menyebar di sekitar rata-rata serta ragam yang konstan. Jadi data tersebut tidak stasioner dalam rata-rata dan ragam.
 
 ## Smoothing
-
-### Double Moving Average (DES)
-
-```{r}
-#Lamda=0.9 dan gamma=0.1
-des.1<- HoltWinters(training.ts, gamma = FALSE, beta = 0.1, alpha = 0.9)
-plot(des.1)
-
-#ramalan
-ramalandes1<- forecast(des.1, h=10)
-ramalandes1
-```
-
-```{r}
-df_des1$fitted
-```
-
-#### Membandingkan plot data latih dan data uji adalah sebagai berikut.
-
-```{r}
-#Visually evaluate the prediction
-plot(dataturis.ts)
-lines(des.1$fitted[,1], lty=2, col="blue")
-lines(ramalandes1$mean, col="red")
-```
-
-#### Akurasi Data Training
-
-```{r}
-sse1 <- df_des1$SSE 
-mse1 <- sse1/length(training.ts)
-rmse1 <-sqrt(mse1)
-akurasi1 <- c("SSE"=sse1, "MSE"=mse1, "RMSE"=rmse1)
-akurasi1
-```
-
-#### Fungsi Mencari Parameter Optimum
-
-```{r}
-n = 10
-df_acc_dma <- data.frame()
-
-for(p in 2:n){
-  mulussma <- TTR::SMA(training.ts, n=p)
-  ts_dma <- TTR::SMA(mulussma, n=p)
-  At <- 2*mulussma - ts_dma
-  Bt <- 2/(2-1)*mulussma - ts_dma
-  mulusdma <- At+Bt
-  ramal_dma <- c(NA, mulusdma)
-  df_dma <- cbind(Aktual=c(training.ts,NA), pemulusan=c(mulusdma,NA),
-                  ramal_dma)
-  head(df_dma)
-  tail(df_dma)
-  
-  error.dma <- df_dma[,1]-df_dma[,3]
-  SSE.dma <- sum(error.dma^2, na.rm=T)
-  MSE.dma <- mean(error.dma^2, na.rm = T)
-  RMSE.dma <- sqrt(mean(error.dma^2, na.rm = T))
-  MAD.dma <- mean(abs(error.dma), na.rm = T)
-  
-  r.error.dma <- (error.dma/df_dma[,1])*100
-  MAPE.dma <- mean(abs(r.error.dma), na.rm = T)
-  
-  vektor <- c(p, SSE.dma,MSE.dma,MAPE.dma,RMSE.dma,MAD.dma)
-  df_acc_dma <- rbind(df_acc_dma, vektor)
-}
-colnames(df_acc_dma) <- c("n", "SSE","MSE","MAPE", "RMSE","MAD")
-kableExtra::kable(df_acc_dma, align = rep('c',7), caption = "Perbandingan Error Pemulusan Metode DMA")
-```
-Diperoleh nilai parameter yang optimal yaitu n=2
-
-#### Forecasting menggunakan DMA
-
-```{r}
- mulussma <- TTR::SMA(training.ts, n=2)
-  ts_dma <- TTR::SMA(mulussma, n=2)
-  At <- 2*mulussma - ts_dma
-  Bt <- 2/(2-1)*(mulussma-ts_dma)
-  mulusdma <- At+Bt
-  ramal_dma <- c(NA, mulusdma) 
-  df_dma <- cbind(Aktual=training.ts, pemulusan = c(mulusdma,rep(NA,27)), ramal_dma= c(ramal_dma, rep(NA,27)))
-  df_dma
-```
-
-#### Plot DMA
-
-```{r}
-# DMA Plot
-ts.plot(df_dma[,1], xlab="Periode Waktu", ylab="Jumlah Wisatawan", col="blue", lty=1, ylim=c(-100000, 1600000))
-points(df_dma[,1],col="black")
-lines(df_dma[,2],col="#66FF66",lwd=2,lty=1)
-lines(df_dma[,3],col="#FF3300",lwd= 2,lty=1)
-title("Peramalan Kunjungan Wisatawan Mancanegara dengan Metode DMA n=2", cex.main=1, font.main=4 ,col.main="black")
-legend("topleft", c("Data Aktual","Pemulusan","Ramalan"),lty=1,col=c ("blue","#66FF66","#FF3300"))
-box(col="black",lwd=2)
-```
-
-#### Akurasi data Testing DMA
-
-```{r}
-      df.master <- data.frame()
-      df_ts_sma <- TTR::SMA(testing.ts,  n=2)
-      df_ts_dma <- TTR::SMA(df_ts_sma, n=2)
-      At <- 2*df_ts_sma-df_ts_dma
-      Bt <- 2/(2-1)*(df_ts_sma-df_ts_dma)
-      pemulusan_dma <- At+Bt
-      ramal_dma <- c(NA, pemulusan_dma)
-      df_dma <- cbind(df_aktual=c(testing.ts,NA), pemulusan_dma=c(pemulusan_dma,NA), ramal_dma)
-      error.dma <- df_dma[, 1] - df_dma[, 3]
-      SSE.dma <- sum(error.dma^2, na.rm = T)
-      MSE.dma <- mean(error.dma^2, na.rm = T)
-      RMSE.dma <- sqrt(mean(error.dma^2, na.rm = T))
-      MAD.dma <- mean(abs(error.dma), na.rm = T)
-      r.error.dma <- (error.dma/df_dma[, 1])*100 
-      MAPE.dma <- mean(abs(r.error.dma), na.rm = T)
-      ak <- data.frame(n=2,SSE=SSE.dma,MSE=MSE.dma,RMSE=RMSE.dma,
-                       MAD=MAD.dma,MAPE=MAPE.dma)
-      df.master <- rbind(df.master,ak)
-      df.master
-```
 
 ### Double Exponential Smoothing
 
@@ -312,7 +192,128 @@ akDES <- data.frame(SSE=SSEtestingdes,MSE=MSEtestingdes,RMSE=RMSEtestingdes,
 akDES
 ```
 
-### Winter's Aditif 
+### Double Moving Average (DES)
+
+```{r}
+#Lamda=0.9 dan gamma=0.1
+des.1<- HoltWinters(training.ts, gamma = FALSE, beta = 0.1, alpha = 0.9)
+plot(des.1)
+
+#ramalan
+ramalandes1<- forecast(des.1, h=10)
+ramalandes1
+```
+
+```{r}
+df_des1$fitted
+```
+
+#### Membandingkan plot data latih dan data uji adalah sebagai berikut.
+
+```{r}
+#Visually evaluate the prediction
+plot(dataturis.ts)
+lines(des.1$fitted[,1], lty=2, col="blue")
+lines(ramalandes1$mean, col="red")
+```
+
+#### Akurasi Data Training
+
+```{r}
+sse1 <- df_des1$SSE 
+mse1 <- sse1/length(training.ts)
+rmse1 <-sqrt(mse1)
+akurasi1 <- c("SSE"=sse1, "MSE"=mse1, "RMSE"=rmse1)
+akurasi1
+```
+
+#### Fungsi Mencari Parameter Optimum
+
+```{r}
+n = 10
+df_acc_dma <- data.frame()
+
+for(p in 2:n){
+  mulussma <- TTR::SMA(training.ts, n=p)
+  ts_dma <- TTR::SMA(mulussma, n=p)
+  At <- 2*mulussma - ts_dma
+  Bt <- 2/(2-1)*mulussma - ts_dma
+  mulusdma <- At+Bt
+  ramal_dma <- c(NA, mulusdma)
+  df_dma <- cbind(Aktual=c(training.ts,NA), pemulusan=c(mulusdma,NA),
+                  ramal_dma)
+  head(df_dma)
+  tail(df_dma)
+  
+  error.dma <- df_dma[,1]-df_dma[,3]
+  SSE.dma <- sum(error.dma^2, na.rm=T)
+  MSE.dma <- mean(error.dma^2, na.rm = T)
+  RMSE.dma <- sqrt(mean(error.dma^2, na.rm = T))
+  MAD.dma <- mean(abs(error.dma), na.rm = T)
+  
+  r.error.dma <- (error.dma/df_dma[,1])*100
+  MAPE.dma <- mean(abs(r.error.dma), na.rm = T)
+  
+  vektor <- c(p, SSE.dma,MSE.dma,MAPE.dma,RMSE.dma,MAD.dma)
+  df_acc_dma <- rbind(df_acc_dma, vektor)
+}
+colnames(df_acc_dma) <- c("n", "SSE","MSE","MAPE", "RMSE","MAD")
+kableExtra::kable(df_acc_dma, align = rep('c',7), caption = "Perbandingan Error Pemulusan Metode DMA")
+```
+
+Diperoleh nilai parameter yang optimal yaitu n=2
+
+#### Forecasting menggunakan DMA
+
+```{r}
+ mulussma <- TTR::SMA(training.ts, n=2)
+  ts_dma <- TTR::SMA(mulussma, n=2)
+  At <- 2*mulussma - ts_dma
+  Bt <- 2/(2-1)*(mulussma-ts_dma)
+  mulusdma <- At+Bt
+  ramal_dma <- c(NA, mulusdma) 
+  df_dma <- cbind(Aktual=training.ts, pemulusan = c(mulusdma,rep(NA,27)), ramal_dma= c(ramal_dma, rep(NA,27)))
+  df_dma
+```
+
+#### Plot DMA
+
+```{r}
+# DMA Plot
+ts.plot(df_dma[,1], xlab="Periode Waktu", ylab="Jumlah Wisatawan", col="blue", lty=1, ylim=c(-100000, 1600000))
+points(df_dma[,1],col="black")
+lines(df_dma[,2],col="#66FF66",lwd=2,lty=1)
+lines(df_dma[,3],col="#FF3300",lwd= 2,lty=1)
+title("Peramalan Kunjungan Wisatawan Mancanegara dengan Metode DMA n=2", cex.main=1, font.main=4 ,col.main="black")
+legend("topleft", c("Data Aktual","Pemulusan","Ramalan"),lty=1,col=c ("blue","#66FF66","#FF3300"))
+box(col="black",lwd=2)
+```
+
+#### Akurasi data Testing DMA
+
+```{r}
+      df.master <- data.frame()
+      df_ts_sma <- TTR::SMA(testing.ts,  n=2)
+      df_ts_dma <- TTR::SMA(df_ts_sma, n=2)
+      At <- 2*df_ts_sma-df_ts_dma
+      Bt <- 2/(2-1)*(df_ts_sma-df_ts_dma)
+      pemulusan_dma <- At+Bt
+      ramal_dma <- c(NA, pemulusan_dma)
+      df_dma <- cbind(df_aktual=c(testing.ts,NA), pemulusan_dma=c(pemulusan_dma,NA), ramal_dma)
+      error.dma <- df_dma[, 1] - df_dma[, 3]
+      SSE.dma <- sum(error.dma^2, na.rm = T)
+      MSE.dma <- mean(error.dma^2, na.rm = T)
+      RMSE.dma <- sqrt(mean(error.dma^2, na.rm = T))
+      MAD.dma <- mean(abs(error.dma), na.rm = T)
+      r.error.dma <- (error.dma/df_dma[, 1])*100 
+      MAPE.dma <- mean(abs(r.error.dma), na.rm = T)
+      ak <- data.frame(n=2,SSE=SSE.dma,MSE=MSE.dma,RMSE=RMSE.dma,
+                       MAD=MAD.dma,MAPE=MAPE.dma)
+      df.master <- rbind(df.master,ak)
+      df.master
+```
+
+### Winter's Aditif
 
 ####Pemulusan
 
@@ -320,7 +321,6 @@ akDES
 aditif <- HoltWinters(training.ts, seasonal = "additive")
 aditif 
 ```
-
 
 #### Forecasting
 
@@ -403,3 +403,5 @@ row.names(akurasi)<- c("SSE", "MSE", "MAD", "MAPE")
 colnames(akurasi) <- c("DMA", "DES", "Winter Aditif", "Winter Multiplikatif")
 kableExtra::kable(akurasi,caption = 'Penentuan Model Smoothing Terbaik',  align = rep('c',7))
 ```
+
+Berdasarkan data testing, model Winter's Aditif merupakan model terbaik dilihat dari perbandingan ukuran kebaikan model di atas.
