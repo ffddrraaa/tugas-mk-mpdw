@@ -399,4 +399,5 @@ colnames(akurasi) <- c("DMA", "DES", "Winter Aditif", "Winter Multiplikatif")
 kableExtra::kable(akurasi,caption = 'Penentuan Model Smoothing Terbaik',  align = rep('c',7))
 ```
 
-Berdasarkan data testing, model Holt Winter Aditif merupakan model terbaik dilihat dari perbandingan ukuran kebaikan model di atas.
+Berdasarkan data testing, model Holt Winter Aditif merupakan model terbaik dilihat dari perbandingan ukuran kebaikan model di atas, namun penyebab mape menghasilkan nilai inf disebabkan beberapa data di periode bulan terdampak covid pada data aktualnya NOL
+
