@@ -9,7 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Library yang digunakan
+## Library yang digunakan
 
 ```{r}
 library("forecast")
@@ -21,7 +21,7 @@ library("ggplot2")
 library("kableExtra") 
 ```
 
-#Impor Data (Data jumlah wisatawan mancanegara di bali yang digunakan yaitu 10 tahun terakhir mulai januari 2013 hingga juni 2023)
+## Impor Data (Data jumlah wisatawan mancanegara di bali yang digunakan yaitu 10 tahun terakhir mulai januari 2013 hingga juni 2023)
 
 ```{r}
 turisbali <- import("https://raw.githubusercontent.com/ffddrraaa/tugas-prak-mpdw1/main/Data%20Pendatang%20Mancanegara%20di%20Provinsi%20Bali.csv")
@@ -33,7 +33,7 @@ periode_wisata <- as.Date(data.turis$Bulan,"%y/%m/%d")
 kableExtra::kable(head(data.turis) ,caption = 'Subset Data Jumlah Kunjungan Wisatawan Mancanegara ke Indonesia 2013-2022',  align = rep('c',7))
 ```
 
-#Eksplorasi Data
+## Eksplorasi Data
 
 ```{r}
 View(data.turis)
@@ -41,14 +41,14 @@ str(data.turis)
 dim(data.turis)
 ```
 
-#Mengubah data agar terbaca sebagai data deret waktu dengan fungsi `ts()` .
+## Mengubah data agar terbaca sebagai data deret waktu dengan fungsi `ts()` .
 
 ```{r}
 dataturis.ts <- ts(data.turis$Jumlah, frequency = 12, start = 2013)
 dataturis.ts
 ```
 
-#Membuat plot data deret waktu
+## Membuat plot data deret waktu
 
 ```{r}
 plot_wisatawan = ts(data.turis$Jumlah, frequency = 12, start= 2013)
@@ -57,17 +57,18 @@ plot(plot_wisatawan, main = "Kunjungan Wisatawan Mancanegara Mengunjungi Bali Pe
 points(plot_wisatawan)
 ```
 
-#Pembagian data latih dan data uji dilakukan dengan perbandingan 80% data latih dan 20% data uji.
+## Pembagian data latih dan data uji dilakukan dengan perbandingan 80% data latih dan 20% data uji.
+
+### Data training dan testing
 
 ```{r}
-#membagi data menjadi training dan testing
 training<-data.turis[1:100,2]
 testing<-data.turis[101:126,2]
 training.ts<-ts(training, frequency = 12, start = 2013)
 testing.ts<-ts(testing, frequency = 12, start=2021)
 ```
 
-##Eksplorasi Data latih dan data uji Eksplorasi data dilakukan pada keseluruhan data, data latih serta data uji menggunakan plot data deret waktu.
+### Eksplorasi Data latih dan data uji Eksplorasi data dilakukan pada keseluruhan data, data latih serta data uji menggunakan plot data deret waktu.
 
 ```{r}
 #eksplorasi keseluruhan data
@@ -83,8 +84,9 @@ plot(testing.ts, col="blue",main="Plot data uji", xlab="Periode", ylab="Jumlah W
 points(testing.ts)
 ```
 
+### Eksplorasi dengan GGPLOT
+
 ```{r}
-#Eksplorasi dengan GGPLOT
 plot(training.ts, main = "Kunjungan Wisatawan Mancanegara Periode Tahun 2013-2023", 
      xlab = "Tahun", ylab="Wisatawan", xlim=c(2013,2023), ylim=c(0,1000000), lwd=2)
 points(training.ts)
@@ -96,7 +98,9 @@ legend("bottomleft", c("Data Training", "Data Testing"), lty=1, col=c("black", "
 
 Berdasarkan plot deret waktu data training dan testing jumlah kunjungan wisatawan mancanegara, terlihat bahwa data tidak stasioner karena plot data tidak menyebar di sekitar rata-rata serta ragam yang konstan. Jadi data tersebut tidak stasioner dalam rata-rata dan ragam.
 
-#Smoothing ##Double Moving Average (DES)
+## Smoothing
+
+### Double Moving Average (DES)
 
 ```{r}
 #Lamda=0.9 dan gamma=0.1
@@ -112,7 +116,7 @@ ramalandes1
 df_des1$fitted
 ```
 
-###Membandingkan plot data latih dan data uji adalah sebagai berikut.
+#### Membandingkan plot data latih dan data uji adalah sebagai berikut.
 
 ```{r}
 #Visually evaluate the prediction
@@ -121,7 +125,7 @@ lines(des.1$fitted[,1], lty=2, col="blue")
 lines(ramalandes1$mean, col="red")
 ```
 
-###Akurasi Data Training
+#### Akurasi Data Training
 
 ```{r}
 sse1 <- df_des1$SSE 
@@ -131,7 +135,7 @@ akurasi1 <- c("SSE"=sse1, "MSE"=mse1, "RMSE"=rmse1)
 akurasi1
 ```
 
-###Fungsi Mencari Parameter Optimum
+#### Fungsi Mencari Parameter Optimum
 
 ```{r}
 n = 10
@@ -165,7 +169,7 @@ colnames(df_acc_dma) <- c("n", "SSE","MSE","MAPE", "RMSE","MAD")
 kableExtra::kable(df_acc_dma, align = rep('c',7), caption = "Perbandingan Error Pemulusan Metode DMA")
 ```
 
-###Forecasting menggunakan DMA
+#### Forecasting menggunakan DMA
 
 ```{r}
  mulussma <- TTR::SMA(training.ts, n=2)
@@ -178,7 +182,7 @@ kableExtra::kable(df_acc_dma, align = rep('c',7), caption = "Perbandingan Error 
   df_dma
 ```
 
-###Plot DMA
+#### Plot DMA
 
 ```{r}
 # DMA Plot
@@ -191,7 +195,7 @@ legend("topleft", c("Data Aktual","Pemulusan","Ramalan"),lty=1,col=c ("blue","#6
 box(col="black",lwd=2)
 ```
 
-###Akurasi data Testing DMA
+#### Akurasi data Testing DMA
 
 ```{r}
       df.master <- data.frame()
@@ -215,7 +219,9 @@ box(col="black",lwd=2)
       df.master
 ```
 
-##Double Exponential Smoothing ###Iterasi Mencari Nilai Alpha Beta Optimum
+### Double Exponential Smoothing
+
+#### Iterasi Mencari Nilai Alpha Beta Optimum
 
 ```{r}
 a = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
@@ -259,13 +265,13 @@ ramal_des1 <- forecast::forecast(df_des1,h=26) #periode ramalan sebanyak 14
 (df_ramal_des1 <- data.frame(ramal_des1))
 ```
 
-###Plot Peramalan
+#### Plot Peramalan
 
 ```{r}
 plot(ramal_des1, xlab="Tahun", ylab="Jumlah Wisatawan",main="Double Exponential Smoothing (Alpha=0.9, Beta=0.1)")
 ```
 
-###Gabungan Data Aktual, Pemulusan, dan Ramalan
+#### Gabungan Data Aktual, Pemulusan, dan Ramalan
 
 ```{r}
 data.des1 <- cbind(aktual=c(training.ts, rep(NA,26)),
@@ -275,7 +281,7 @@ data.des1 <- ts(data.des1, start=2013, freq=12)
 data.des1
 ```
 
-###Plot Hasil Pemulusan DES
+#### Plot Hasil Pemulusan DES
 
 ```{r}
 ts.plot(data.des1[,1], xlab="Tahun", ylab="Jumlah Wisatawan", col="blue", lty=1)
@@ -289,7 +295,7 @@ legend("topleft", c("Data aktual", "Fitted DES","Ramalan"), lty=1,col=c ("blue",
 
 Berdasarkan eksplorasi di atas, plot data training hasil pemulusan menggunakan metode pemulusan DES dengan α = 0.9 dan β = 0.1 memiliki pola hampir sama dengan plot data aktual dibandingkan dengan data peramalannya.
 
-###Akurasi data testing DES
+#### Akurasi data testing DES
 
 ```{r}
 selisihdes<-ramal_des1$mean-testing.ts
@@ -304,18 +310,93 @@ akDES <- data.frame(SSE=SSEtestingdes,MSE=MSEtestingdes,RMSE=RMSEtestingdes,
 akDES
 ```
 
-##Winter's Aditif ###Pemulusan
+### Winter's Aditif ###Pemulusan
 
 ```{r}
 aditif <- HoltWinters(training.ts, seasonal = "additive")
 aditif 
 ```
 
-###Forecasting
+#### Forecasting
 
 ```{r}
 ramalan1 <- forecast(aditif, h=26)
 ramalan1
 ```
 
-#Winter's Multiplikatif
+#### Akurasi data training
+
+```{r}
+sse1.train <- aditif$SSE
+sse1.train
+```
+
+#### Plot Pemulusan
+
+```{r}
+plot(ramalan1, xlab="Tahun", ylab="Jumlah Kunjungan")
+```
+
+### Winter's Multiplikatif
+
+#### Pemulusan
+
+```{r}
+multi <- HoltWinters(training.ts, seasonal = "multiplicative")
+multi 
+```
+
+#### Forecasting
+
+```{r}
+ramalan2 <- holt(training.ts, damped = TRUE, seasonal = "multiplicative", h=14)
+ramalan2
+```
+
+#### Akurasi data training
+
+```{r}
+sse2.train <- multi$SSE
+sse2.train
+```
+
+#### Plot Pemulusan
+
+```{r}
+plot(ramalan2, xlab="Tahun", ylab="Jumlah Kunjungan")
+```
+
+```{r}
+selisih1<-as.numeric(ramalan1$mean)-as.numeric(testing.ts)
+SSEtesting1<-sum(selisih1^2)
+MSEtesting1<-mean(selisih1^2)
+RMSEtesting1<-sqrt(mean(selisih1^2))
+MADtesting1<-mean(abs(selisih1^2))
+r.error.testing1 <- (selisih1/testing.ts)*100 
+      MAPEtesting1 <- mean(abs(r.error.testing1), na.rm = T)
+
+selisih2<-as.numeric(ramalan2$mean)-as.numeric(testing.ts)
+SSEtesting2<-sum(selisih2^2)
+MSEtesting2<-mean(selisih2^2)
+RMSEtesting2<-sqrt(mean(selisih2^2))
+MADtesting2<-mean(abs(selisih2^2))
+r.error.testing2 <- (selisih1/testing.ts)*100 
+      MAPEtesting2 <- mean(abs(r.error.testing2), na.rm = T)
+
+
+akurasi <- matrix(c(SSEtesting1, MSEtesting1, RMSEtesting1, MADtesting1, MAPEtesting1, SSEtesting2,  MSEtesting2,  RMSEtesting2, MADtesting2, MAPEtesting2), nrow=5, ncol=2)
+row.names(akurasi)<- c("SSE", "MSE", "RMSE", "MAD", "MAPE")
+colnames(akurasi) <- c("Aditif", "Multiplikatif")
+akurasi
+```
+
+### Perbandingan Nilai Akurasi Semua Metode
+
+```{r}
+akurasi <- matrix(c(SSE.dma, MSE.dma, MAD.dma, MAPE.dma, SSEtestingdes,  MSEtestingdes,  MADtestingdes, MAPEtestingdes, SSEtesting1, MSEtesting1, MADtesting1, MAPEtesting1, SSEtesting2,  MSEtesting2, MADtesting2, MAPEtesting2), nrow=4)
+row.names(akurasi)<- c("SSE", "MSE", "MAD", "MAPE")
+colnames(akurasi) <- c("DMA", "DES", "Winter Aditif", "Winter Multiplikatif")
+kableExtra::kable(akurasi,caption = 'Penentuan Model Smoothing Terbaik',  align = rep('c',7))
+```
+
+Berdasarkan data testing, model Holt Winter Aditif merupakan model terbaik dilihat dari perbandingan ukuran kebaikan model di atas.
