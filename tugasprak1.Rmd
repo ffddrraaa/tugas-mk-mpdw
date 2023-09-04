@@ -400,3 +400,4 @@ kableExtra::kable(akurasi,caption = 'Penentuan Model Smoothing Terbaik',  align 
 ```
 
 Berdasarkan data testing, model Holt Winter Aditif merupakan model terbaik dilihat dari perbandingan ukuran kebaikan model di atas.
+
