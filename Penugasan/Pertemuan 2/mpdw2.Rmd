@@ -274,6 +274,8 @@ row.names(akurasi) <- c("SSE","MSE")
 akurasi
 ```
 
-Berdasarkan hasil tersebut dapat diketahui bahwa hasil penanganan autokorelasi dengan metode Cochrane-Orcutt dan Hildreth-Lu memiliki SSE yang sama, sebesar $0.23975$ dan lebih baik dibandingkan model awal ketika autokorelasi masih terjadi, yaitu sebesar $0.3286364$.
+Berdasarkan hasil tersebut dapat diketahui bahwa hasil penanganan autokorelasi dengan metode Hildreth-Lu memiliki SSE yang lebih kecil sebesar $1953165.48$ dan lebih baik dibandingkan model awal ketika autokorelasi masih terjadi, yaitu sebesar $5408274.0$.
 
 # Simpulan
+Autokorelasi yang terdapat pada dataset wine di kawasan Napa, california tahun 1980-2020 terjadi akibat adanya korelasi di antara unsur penyusunnya. 
+
