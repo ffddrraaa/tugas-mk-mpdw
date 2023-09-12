@@ -222,11 +222,11 @@ tab <- data.frame("rho" = r, "SSE" = sapply(r, function(i){deviance(hildreth.lu.
 round(tab, 4)
 ```
 
-Pertama-tama akan dicari di mana kira-kira $ρ$ yang menghasilkan SSE minimum. Pada hasil di atas terlihat $ρ$ minimum ketika 0.8. Namun, hasil tersebut masih kurang teliti sehingga akan dicari kembali $ρ$ yang lebih optimum dengan ketelitian yang lebih. Jika sebelumnya jarak antar $ρ$ yang dicari adalah 0.1, kali ini jarak antar $ρ$ adalah 0.001 dan dilakukan pada selang 0.8 sampai dengan 0.9.
+Pertama-tama akan dicari di mana kira-kira $ρ$ yang menghasilkan SSE minimum. Pada hasil di atas terlihat $ρ$ minimum ketika 0.8. Namun, hasil tersebut masih kurang teliti sehingga akan dicari kembali $ρ$ yang lebih optimum dengan ketelitian yang lebih. Jika sebelumnya jarak antar $ρ$ yang dicari adalah 0.1, kali ini jarak antar $ρ$ adalah 0.001 dan dilakukan pada selang 0.6 sampai dengan 0.9.
 
 ```{r}
-#Rho optimal di sekitar 0.4
-rOpt <- seq(0.8,0.9, by= 0.001)
+#Rho optimal
+rOpt <- seq(0.6,0.9, by= 0.001)
 tabOpt <- data.frame("rho" = rOpt, "SSE" = sapply(rOpt, function(i){deviance(hildreth.lu.func(i, model))}))
 head(tabOpt[order(tabOpt$SSE),])
 
@@ -237,25 +237,25 @@ abline(v = tabOpt[tabOpt$SSE==min(tabOpt$SSE),"rho"], lty = 2, col="red",lwd=2)
 text(x=0.341, y=0.2397500, labels = "rho=0.341", cex = 0.8)
 ```
 
-Perhitungan yang dilakukan aplikasi `R` menunjukkan bahwa nilai $ρ$ optimum, yaitu saat SSE terkecil terdapat pada nilai $ρ=0.800$. Hal tersebut juga ditunjukkan pada plot. Selanjutnya, model dapat didapatkan dengan mengevaluasi nilai $ρ$ ke dalam fungsi `hildreth.lu.func`, serta dilanjutkan dengan pengujian autokorelasi dengan uji Durbin-Watson. Namun, setelah pengecekan tersebut tidak lupa koefisien regresi tersebut digunakan untuk transformasi balik. Persamaan hasil transformasi itulah yang menjadi persamaan sesungguhnya.
+Perhitungan yang dilakukan aplikasi `R` menunjukkan bahwa nilai $ρ$ optimum, yaitu saat SSE terkecil terdapat pada nilai $ρ=0.760$. Hal tersebut juga ditunjukkan pada plot. Selanjutnya, model dapat didapatkan dengan mengevaluasi nilai $ρ$ ke dalam fungsi `hildreth.lu.func`, serta dilanjutkan dengan pengujian autokorelasi dengan uji Durbin-Watson. Namun, setelah pengecekan tersebut tidak lupa koefisien regresi tersebut digunakan untuk transformasi balik. Persamaan hasil transformasi itulah yang menjadi persamaan sesungguhnya.
 
 ```{r}
 #Model terbaik
-modelHL <- hildreth.lu.func(0.800, model)
+modelHL <- hildreth.lu.func(0.760, model)
 summary(modelHL)
 
 #Transformasi Balik
-cat("y = ", coef(modelHL)[1]/(1-0.800), "+", coef(modelHL)[2],"x1","+", coef(modelHL)[3],"x2","+",coef(modelHL)[4],"x3", sep = "")
+cat("y = ", coef(modelHL)[1]/(1-0.760), "+", coef(modelHL)[2],"x1","+", coef(modelHL)[3],"x2","+",coef(modelHL)[4],"x3", sep = "")
 ```
 
-Setelah dilakukan tranformasi balik, didapatkan model dengan metode Hildreth-Lu sebagai berikut. $$y_i=312168.1-154.2851x_t-0.04606169x_(t-1)+0.002951318x_(t-2)$$
+Setelah dilakukan tranformasi balik, didapatkan model dengan metode Hildreth-Lu sebagai berikut. $$y_i=310077.5-153.2211x_t-0.04636841x_(t-1)+0.002965518x_(t-2)$$
 
 ```{r}
 #Deteksi autokorelasi
 dwtest(modelHL)
 ```
 
-Hasil uji Durbin-Watson juga menunjukkan bawah nilai DW sebesar $1.4132$ dan tidak berada pada dalam selang daerah tidak ada autokorelasi, yaitu pada rentang DU \< DW \< 4-DU atau $1.6603 < DW < 2,3397$. Hal tersebut juga didukung oleh *p-value* sebesar $0.01629$, di mana *p-value* \< $\alpha$=5%. Artinya tolak $H_0$ atau cukup bukti menyatakan bahwa ada autokorelasi dalam data nilai penjualan wine dengan metode Hildreth-Lu pada taraf nyata 5%.
+Hasil uji Durbin-Watson juga menunjukkan bawah nilai DW sebesar $1.3937$ dan tidak berada pada dalam selang daerah tidak ada autokorelasi, yaitu pada rentang DU \< DW \< 4-DU atau $1.6603 < DW < 2,3397$. Hal tersebut juga didukung oleh *p-value* sebesar $0.01348$, di mana *p-value* \< $\alpha$=5%. Artinya tolak $H_0$ atau cukup bukti menyatakan bahwa ada autokorelasi dalam data nilai penjualan wine dengan metode Hildreth-Lu pada taraf nyata 5%.
 
 Terakhir, akan dibandingkan nilai SSE dari ketiga metode (metode awal, metode Cochrane-Orcutt, dan Hildreth-Lu).
 
