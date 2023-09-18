@@ -236,7 +236,7 @@ summary(model.ardl)
 ```
 
 ```{r}
-model.ardl1 = ardlDlm(x = train$Xt, y = train$Yt, p = 7 , q = 11)
+model.ardl1 = ardlDlm(x = train$Xt, y = train$Yt, p = 7 , q = 10)
 summary(model.ardl1)
 ```
 Melalui model ARDL tidak diperoleh peubah yang berpengaruh secara signifikan. Model ini cukup baik dengan nilai R-Square sebesar 99.98%.
@@ -281,7 +281,8 @@ points(test$Xt, fore.dlm$forecasts,col="blue")
 points(test$Xt, fore.ardl$forecasts,col="green")
 legend("topleft",c("Aktual", "Koyck","DLM", "ARDLM"), lty=1, col=c("black","red","blue","green"), cex=0.8)
 ```
-Hasil dari visualisasi di atas menunjukkan bahwa model Koyck merupakan metode yang paling sesuai untuk peramalan data wine karena memiliki pola data aktual, walaupun masih sangat jauh. Hal ini terjadi karena data testing hanya sejumlah 8 sehingga untuk mendapatkan model yang lebih akurat data testing harus ditambahkan.
+Hasil dari visualisasi di atas menunjukkan bahwa model ARDLM merupakan metode yang paling sesuai untuk peramalan data wine karena memiliki pola data aktual, walaupun masih sangat jauh. Kurangnya data testing membuat hasil kurang maksimal oleh karena itu perlu ditambahkan kembali data testing yang digunakan.
+
 
 
 
